@@ -11,7 +11,6 @@ PROJECT_ID              = os.environ.get("DT_PROJECT_ID")
 
 URL = f"https://emulator.d21s.com/v2/projects/{PROJECT_ID}/devices/{SENSOR_ID}:publish"
 
-
 def post_datapoint(datapoint):
     post = requests.post(
         url=URL,
@@ -20,6 +19,12 @@ def post_datapoint(datapoint):
     )
     print(post)
 
+
+
 for i in range(6):
+    before = time.time()
     post_datapoint(random.randrange(-10**4, 10**4)/10**(2))
+    print(time.time() - before)
     time.sleep(1)
+
+
