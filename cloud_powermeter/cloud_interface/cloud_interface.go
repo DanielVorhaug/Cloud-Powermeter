@@ -3,7 +3,6 @@ package cloud_interface
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"time"
@@ -17,21 +16,26 @@ var PROJECT_ID string = os.Getenv("DT_PROJECT_ID")
 var URL string = "https://emulator.d21s.com/v2/projects/" + PROJECT_ID + "/devices/" + SENSOR_ID + ":publish"
 
 func Post_datapoint(channel_data <-chan float32) {
-	datapoint := <- channel_data
+	for {
+		select {
+		case datapoint := <-channel_data:
+			timeBegin := time.Now().UnixNano()
+			var data string = "{\"temperature\": {\"value\": " + fmt.Sprint(datapoint) + "}}"
+			body := bytes.NewBufferString(data)
 
-	var data string = "{\"temperature\": {\"value\": " + fmt.Sprint(datapoint) + "}}"
-	body := bytes.NewBufferString(data)
+			client := http.Client{Timeout: 10 * time.Second}
 
-	client := http.Client{Timeout: 10 * time.Second}
+			req, _ := http.NewRequest(http.MethodPost, URL, body)
+			req.SetBasicAuth(SERVICE_ACCOUNT_KEY_ID, SERVICE_ACCOUNT_SECRET)
+			res, _ := client.Do(req)
 
-	req, _ := http.NewRequest(http.MethodPost, URL, body)
-	req.SetBasicAuth(SERVICE_ACCOUNT_KEY_ID, SERVICE_ACCOUNT_SECRET)
-	res, _ := client.Do(req)
-
-	defer res.Body.Close()
-	resBody, _ := io.ReadAll(res.Body)
-	fmt.Printf("Status: %d\n", res.StatusCode)
-	fmt.Printf("Body: %s\n", string(resBody))
+			defer res.Body.Close()
+			// resBody, _ := io.ReadAll(res.Body)
+			// fmt.Printf("Status: %d\n", res.StatusCode)
+			// fmt.Printf("Body: %s\n", string(resBody))
+			fmt.Printf("Time taken: %f\n", float32(time.Now().UnixNano() - timeBegin)/1000000000.0)
+		}
+	}
 }
 
 func Test() {
