@@ -19,7 +19,6 @@ func Post_datapoint(channel_data <-chan float32) {
 	for {
 		select {
 		case datapoint := <-channel_data:
-			timeBegin := time.Now().UnixNano()
 			var data string = "{\"temperature\": {\"value\": " + fmt.Sprint(datapoint) + "}}"
 			body := bytes.NewBufferString(data)
 
@@ -29,11 +28,7 @@ func Post_datapoint(channel_data <-chan float32) {
 			req.SetBasicAuth(SERVICE_ACCOUNT_KEY_ID, SERVICE_ACCOUNT_SECRET)
 			res, _ := client.Do(req)
 
-			defer res.Body.Close()
-			// resBody, _ := io.ReadAll(res.Body)
-			// fmt.Printf("Status: %d\n", res.StatusCode)
-			// fmt.Printf("Body: %s\n", string(resBody))
-			fmt.Printf("Time taken: %f\n", float32(time.Now().UnixNano() - timeBegin)/1000000000.0)
+			res.Body.Close()
 		}
 	}
 }
