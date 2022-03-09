@@ -44,23 +44,21 @@ func track_blinks(channel_blink <-chan bool, channel_data chan<- float32) {
 	next_message_time           := sampling_period_start_time + MESSAGE_INTERVAL*1000000
 
 	for {		
-		select {
-		case <-channel_blink:
-			blink_count++
+		<-channel_blink
+		blink_count++
 
-			second_to_last_blink_time := last_blink_time
-			last_blink_time = time.Now().UnixNano()
-			fmt.Printf("Power: %.2fW\n", calculate_power(1, last_blink_time, second_to_last_blink_time))
+		second_to_last_blink_time := last_blink_time
+		last_blink_time = time.Now().UnixNano()
+		fmt.Printf("Power: %.2fW\n", calculate_power(1, last_blink_time, second_to_last_blink_time))
 
-			if last_blink_time > next_message_time {
-				channel_data <- calculate_power(blink_count, last_blink_time, sampling_period_start_time)
+		if last_blink_time > next_message_time {
+			channel_data <- calculate_power(blink_count, last_blink_time, sampling_period_start_time)
 
-				for next_message_time < time.Now().UnixNano() {
-					next_message_time += MESSAGE_INTERVAL*1000000
-				}
-				sampling_period_start_time = last_blink_time
-				blink_count = 0
+			for next_message_time < time.Now().UnixNano() {
+				next_message_time += MESSAGE_INTERVAL*1000000
 			}
+			sampling_period_start_time = last_blink_time
+			blink_count = 0
 		}
 	}
 }

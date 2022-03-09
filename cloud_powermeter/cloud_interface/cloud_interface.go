@@ -17,27 +17,17 @@ var URL string = "https://emulator.d21s.com/v2/projects/" + PROJECT_ID + "/devic
 
 func Post_datapoint(channel_data <-chan float32) {
 	for {
-		select {
-		case datapoint := <-channel_data:
-			var data string = "{\"temperature\": {\"value\": " + fmt.Sprint(datapoint) + "}}"
-			body := bytes.NewBufferString(data)
+		datapoint := <-channel_data
 
-			client := http.Client{Timeout: 10 * time.Second}
+		var data string = "{\"temperature\": {\"value\": " + fmt.Sprint(datapoint) + "}}"
+		body := bytes.NewBufferString(data)
 
-			req, _ := http.NewRequest(http.MethodPost, URL, body)
-			req.SetBasicAuth(SERVICE_ACCOUNT_KEY_ID, SERVICE_ACCOUNT_SECRET)
-			res, _ := client.Do(req)
+		client := http.Client{Timeout: 10 * time.Second}
 
-			res.Body.Close()
-		}
+		req, _ := http.NewRequest(http.MethodPost, URL, body)
+		req.SetBasicAuth(SERVICE_ACCOUNT_KEY_ID, SERVICE_ACCOUNT_SECRET)
+		res, _ := client.Do(req)
+
+		res.Body.Close()
 	}
-}
-
-func Test() {
-	fmt.Println(URL)
-	fmt.Println(SERVICE_ACCOUNT_KEY_ID)
-	fmt.Println(SERVICE_ACCOUNT_SECRET)
-	fmt.Println(SENSOR_ID)
-	fmt.Println(PROJECT_ID)
-
 }
