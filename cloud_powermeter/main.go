@@ -50,7 +50,7 @@ func track_blinks(channel_blink <-chan bool, channel_data chan<- float32) {
 
 			second_to_last_blink_time := last_blink_time
 			last_blink_time = time.Now().UnixNano()
-			fmt.Printf("Power: %fW", calculate_power(1, last_blink_time, second_to_last_blink_time))
+			fmt.Printf("Power: %.2fW\n", calculate_power(1, last_blink_time, second_to_last_blink_time))
 
 			if last_blink_time > next_message_time {
 				channel_data <- calculate_power(blink_count, last_blink_time, sampling_period_start_time)
