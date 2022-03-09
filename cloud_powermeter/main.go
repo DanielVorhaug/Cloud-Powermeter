@@ -11,7 +11,7 @@ import (
 
 var (
 	pin = rpio.Pin(2)
-	MESSAGE_INTERVAL int64 = 2 // [seconds]
+	MESSAGE_INTERVAL int64 = 500 // [milliseconds]
 	BLINKS_PER_KWH float32 = 2000.0 
 )
 
@@ -24,14 +24,14 @@ func detect_blinks(channel_blink chan<- bool) {
 	defer rpio.Close()
 
 	pin.Input()
-	pin.PullDown()
+	pin.PullUp()
 
 	for {
 		if pin.Read() == rpio.High  {
 			channel_blink <- true
 
 			for pin.Read() == rpio.High {}
-			time.Sleep(1 * time.Millisecond)
+			time.Sleep(30 * time.Millisecond)
 		}
 	}
 }
@@ -41,19 +41,22 @@ func track_blinks(channel_blink <-chan bool, channel_data chan<- float32) {
 	var blink_count int64 = 0
 	last_blink_time             := time.Now().UnixNano()
 	sampling_period_start_time  := time.Now().UnixNano()
-	next_message_time           := sampling_period_start_time + MESSAGE_INTERVAL*1000000000
+	next_message_time           := sampling_period_start_time + MESSAGE_INTERVAL*1000000
 
 	for {		
 		select {
 		case <-channel_blink:
 			blink_count++
+
+			second_to_last_blink_time := last_blink_time
 			last_blink_time = time.Now().UnixNano()
+			fmt.Printf("Power: %fW", calculate_power(1, last_blink_time, second_to_last_blink_time))
 
 			if last_blink_time > next_message_time {
 				channel_data <- calculate_power(blink_count, last_blink_time, sampling_period_start_time)
 
 				for next_message_time < time.Now().UnixNano() {
-					next_message_time += MESSAGE_INTERVAL*1000000000
+					next_message_time += MESSAGE_INTERVAL*1000000
 				}
 				sampling_period_start_time = last_blink_time
 				blink_count = 0
