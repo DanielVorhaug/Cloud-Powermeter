@@ -11,7 +11,7 @@ import (
 
 var (
 	pin = rpio.Pin(2)
-	MESSAGE_INTERVAL int64 = 500 // [milliseconds]
+	MESSAGE_INTERVAL int64 = 60000 // [milliseconds]
 	BLINKS_PER_KWH float32 = 2000.0 
 )
 
