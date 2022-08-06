@@ -3,7 +3,6 @@ package cloud_interface
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -25,16 +24,10 @@ func Post_datapoint(channel_data <-chan float32) {
 
 		client := http.Client{Timeout: 10 * time.Second}
 
-		req, err := http.NewRequest(http.MethodPost, URL, body)
-		if err != nil {
-			log.Fatalln(err)
-		}
+		req, _ := http.NewRequest(http.MethodPost, URL, body)
 
 		req.SetBasicAuth(SERVICE_ACCOUNT_KEY_ID, SERVICE_ACCOUNT_SECRET)
-		res, err := client.Do(req)
-		if err != nil {
-			log.Fatalln(err)
-		}
+		res, _ := client.Do(req)
 
 		res.Body.Close()
 	}
