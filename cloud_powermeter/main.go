@@ -76,7 +76,7 @@ func main() {
 	
 	go detect_blinks(channel_blink)
 	go track_blinks(channel_blink, channel_data)
-	go cloud_interface.Post_datapoint(channel_data)
+	go cloud_interface.Post_datapoint_request(channel_data)
 
 	for {}
 }
